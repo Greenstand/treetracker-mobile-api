@@ -1,22 +1,29 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var http = require('http');
-var pg = require('pg');
+const express = require('express');
+const bodyParser = require('body-parser');
+const http = require('http');
+const pg = require('pg');
 const { Pool, Client } = require('pg');
-var path = require('path');
-var app = express();
-var port = process.env.PORT || 3000;
-var conn = require('./config');
+const path = require('path');
+const app = express();
+const port = process.env.PORT || 3000;
+const conn = require('./config');
 
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 app.set('view engine','html');
 
 const pool = new Pool({
-    
-    connectionString: conn.connectionString
-  });
+  connectionString: conn.connectionString
+});
 
+pool.on('connect', (client) => {
+  console.log("connected", client);
+})
+
+const auth = require('./auth');
+
+app.post('/auth/token', auth.token);
+app.post('/auth/register', auth.register);
 
   app.post('/trees/create', (req, res)=>{
     
@@ -68,7 +75,7 @@ app.get('/trees', function(req, res){
     
     let query = {      
         
-        text: 'SELECT * FROM datapoints'
+        text: 'SELECT * FROM trees'
       }
       
       pool.query(query)
