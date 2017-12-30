@@ -25,7 +25,7 @@ const auth = require('./auth');
 app.post('/auth/token', auth.token);
 app.post('/auth/register', auth.register);
 
-  app.post('/trees/create', (req, res)=>{
+app.post('/trees/create', (req, res)=>{
     
     let user_id = req.body.user_id;
     let lat = req.body.lat;
