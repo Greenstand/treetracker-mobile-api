@@ -1,4 +1,5 @@
 const express = require('express');
+const bearerToken = require('express-bearer-token');
 const bodyParser = require('body-parser');
 const http = require('http');
 const pg = require('pg');
@@ -12,7 +13,8 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 // token is signed with RSA SHA256
-var cert = fs.readFileSync('private.key');  // get private key
+// var cert = fs.readFileSync('private.key');  // get private key
+var cert = "12piaspdfinpq293h[aosidfj[0q92u3[mpoaisdfja;oi3c;anjsdfn;lak sdf ;aslkdfsa";
 
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
@@ -23,7 +25,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', (client) => {
-  console.log("connected", client);
+  //console.log("connected", client);
 })
 
 
@@ -57,7 +59,7 @@ const token = (req, res) => {
       .then(data => {
         if (data.rows.length === 1) {
           console.log(data);
-          const token = jwt.sign({ email: clientId }, cert, { algorithm: 'RS256'});
+          const token = jwt.sign({ client_id: clientId }, cert);
           return res.status(200).json({"token": token});
         }
         return res.status(401).send('Authentication Failed');
@@ -96,24 +98,74 @@ const register = (req, res) => {
 app.post('/auth/token', token);
 app.post('/auth/register', register);
 
+// middleware layer that checks jwt authentication
+
+app.use(bearerToken());
+app.use((req, res, next)=>{
+  console.log("Middleware");
+  // check header or url parameters or post parameters for token
+  var token = req.token;
+  console.log(token);
+  if(token){
+    //Decode the token
+    jwt.verify(token, cert, (err,decod)=>{
+      if(err){
+        console.log(err);
+        res.status(403).json({
+          message:"Wrong Token"
+        });
+      }
+      else{
+        //If decoded then call next() so that respective route is called.
+        req.decoded=decod;
+        console.log(decod);
+
+        const query = {
+          text: `SELECT id
+          FROM users
+          WHERE email = $1`,
+          values: [decod['client_id']]
+        }
+        pool.query(query)
+        .then(data => {
+            if (data.rows.length === 1) {
+              req.userId = data.rows[0].id;
+              next();
+            } else {
+              res.status(401).send('Authentication Failed');
+            }
+        })
+        .catch(e => console.error(e.stack));
+
+
+      }
+    });
+  }
+  else{
+    res.status(403).json({
+      message:"No Token"
+    });
+  }
+});
 
 app.post('/trees/create', (req, res)=>{
     
-    let user_id = req.body.user_id;
+    console.log('creating');
+    let user_id = req.userId;
     let lat = req.body.lat;
     let lon = req.body.lon;
     let gps_accuracy = req.body.gps_accuracy;
-    let note = req.body.note;
+    let note = req.body.note; // first note
     let timestamp = req.body.timestamp;
-    let image_url = req.body.image_url;
+    let image_url = req.body.image_url; // first image
     
     const query = {
         text: `INSERT INTO 
-               datapoints(user_id,lat, lon, 
-                            gps_accuracy,note, 
-                            timestamp, image_url) 
-                VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-        values: [user_id, lat, lon, gps_accuracy, note, timestamp, image_url],
+               trees(user_id,lat, lon, 
+                            gps_accuracy,
+                            time_created) 
+                VALUES($1, $2, $3, $4, to_timestamp($5) ) RETURNING *`,
+        values: [user_id, lat, lon, gps_accuracy, timestamp],
       }
       
       pool.query(query)
