@@ -95,8 +95,17 @@ const register = (req, res) => {
 
 }
 
+
+const forgot  = (req, res) => {
+  if (!req.body || (!req.body['client_id'] )) {
+    return res.status(500, 'Server Error: No credential submitted');
+  }
+
+}
+
 app.post('/auth/token', token);
 app.post('/auth/register', register);
+app.post('/auth/forgot', forgot);
 
 // middleware layer that checks jwt authentication
 
