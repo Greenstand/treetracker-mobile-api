@@ -12,6 +12,8 @@ const conn = require('./config');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+var nodemailer = require('nodemailer');
+var randomstring = require("randomstring");
 // token is signed with RSA SHA256
 // var cert = fs.readFileSync('private.key');  // get private key
 var cert = "12piaspdfinpq293h[aosidfj[0q92u3[mpoaisdfja;oi3c;anjsdfn;lak sdf ;aslkdfsa";
@@ -28,6 +30,18 @@ pool.on('connect', (client) => {
   //console.log("connected", client);
 })
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+var smtpTransport = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        
+        user: "Elm@greenstand.org",
+        pass: "GreenStand2018"
+    }
+});
 
 const token = (req, res) => {
   console.log(req.body);
@@ -95,13 +109,80 @@ const register = (req, res) => {
 
 }
 
-
 const forgot  = (req, res) => {
+  console.log("reset");
   if (!req.body || (!req.body['client_id'] )) {
     return res.status(500, 'Server Error: No credential submitted');
   }
+  
+  var newpassword = randomstring.generate({
+      length: 12,
+      charset: 'alphabetic'
+  });
+  const salt = bcrypt.genSaltSync(10);
+  const clientnewSecretSaltyHash = bcrypt.hashSync(newpassword, salt);
+  console.log(clientnewSecretSaltyHash);
+  
+  const clientId = req.body['client_id'];
+  const query = {
+    text: `SELECT * 
+    FROM users
+    WHERE email = $1`,
+    values: [clientId]
+  }
+
+  pool.query(query)
+  .then(data => { 
+    console.log(data);
+    resultid = data.rows[0].id;
+    resultemail = data.rows[0].email;
+
+
+  
+  
+  console.log(resultid);
+
+
+    const query = {
+       text: `UPDATE  
+               users SET password = $2
+                WHERE id = $1`,
+        values: [resultid, clientnewSecretSaltyHash]
+    }
+     pool.query(query)
+      .then(data => {
+        console.log(data);
+     })
+      .catch(e => console.error(e.stack));
+  
+  })
+  .catch(e => console.error(e.stack));
+
+  console.log("before");
+  var mailOptions = {
+    
+    to: resultemail,
+    subject: 'Password Reset - GreenStand', 
+    html: 'Hello,<br>Try to login in again.<br>Your new password is: '+newpassword
+
+  };
+  console.log("sending");
+  smtpTransport.sendMail(mailOptions, function(error, info){
+    if(error){
+
+        return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+    res.status(200).json({
+        message: 'Password Reset.'
+    });
+});
+
+
+    
 
 }
+
 
 app.post('/auth/token', token);
 app.post('/auth/register', register);
