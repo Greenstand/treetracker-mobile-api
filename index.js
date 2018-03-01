@@ -38,8 +38,8 @@ var smtpTransport = nodemailer.createTransport({
     secure: true,
     auth: {
         
-        user: "Elm@greenstand.org",
-        pass: "GreenStand2018"
+        user: "",
+        pass: ""
     }
 });
 
