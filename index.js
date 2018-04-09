@@ -73,7 +73,7 @@ const token = (req, res) => {
       .then(data => {
         if (data.rows.length === 1) {
           console.log(data);
-          const token = jwt.sign({ client_id: clientId }, cert);
+          const token = createToken(clientId);
           return res.status(200).json({"token": token});
         }
         return res.status(401).send('Authentication Failed');
@@ -85,6 +85,10 @@ const token = (req, res) => {
 
 };
 
+const createToken = (client_id) => {
+  return jwt.sign({ client_id: clientId }, cert);
+}
+
 const register = (req, res) => {
   if (!req.body || (!req.body['client_id'] || !req.body['client_secret'])) {
     return res.status(500, 'Server Error: No credential submitted');
@@ -95,14 +99,16 @@ const register = (req, res) => {
   console.log(clientSecretSaltyHash);
   const query = {
     text: `INSERT INTO users
-          (first_name, last_name, organization, email, password, salt)
+          (first_name, last_name, organization, phone, email, password, salt)
            VALUES
-          ($1, $2, $3, $4, $5, $6)`,
-    values: ['', '', '', req.body['client_id'], clientSecretSaltyHash, salt ]
+          ($1, $2, $3, $4, $5, $6, $7)`,
+    values: [req.body['first_name'], req.body['last_name'],
+       req.body['organization'], req.body['phone'], 
+       req.body['client_id'], clientSecretSaltyHash, salt ]
   }
   pool.query(query)
   .then(data => {
-    res.status(201);
+    res.status(201).json({"token": createToken(req.body['client_id']) } );
     res.end();
   })
   .catch(e => console.error(e.stack));
