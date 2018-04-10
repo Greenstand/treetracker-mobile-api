@@ -5,19 +5,10 @@ const http = require('http');
 const pg = require('pg');
 const { Pool, Client } = require('pg');
 const path = require('path');
-const app = express();
-const port = process.env.PORT || 3000;
-const conn = require('./config');
-
-const fs = require('fs');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const randomstring = require("randomstring");
-app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
-app.use(bodyParser.json()); // parse application/json
-app.set('view engine','html');
 
+const conn = require('./config');
 const pool = new Pool({
   connectionString: conn.connectionString
 });
@@ -27,6 +18,13 @@ pool.on('connect', (client) => {
 })
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+app.use(bodyParser.json()); // parse application/json
+app.set('view engine','html');
 
 app.post('/auth/token', function(req, res){
   if (!req.body || (!req.body['client_id'] || !req.body['client_secret'])) {
