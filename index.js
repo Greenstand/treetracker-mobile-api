@@ -244,68 +244,40 @@ app.use((req, res, next)=>{
   }
 });
 
-app.post('/trees/create', (req, res)=>{
-    
-    console.log('creating');
-    let user_id = req.userId;
-    let lat = req.body.lat;
-    let lon = req.body.lon;
-    let gps_accuracy = req.body.gps_accuracy;
-    let note = req.body.note; // first note
-    let timestamp = req.body.timestamp;
-    let image_url = req.body.image_url; // first image
-    
-    const query = {
-        text: `INSERT INTO 
-               trees(user_id,lat, lon, 
-                            gps_accuracy,
-                            time_created) 
-                VALUES($1, $2, $3, $4, to_timestamp($5) ) RETURNING *`,
-        values: [user_id, lat, lon, gps_accuracy, timestamp],
-      }
-      
-      pool.query(query)
-      .then(res => console.log(res.rows[0]))
-      .catch(e => console.error(e.stack));
-    res.end();
-});
-
 app.get('/favicon.ico', function(req, res) {
     res.status(204);
     res.end();
 });
 
+app.post('/trees/create', fucntion(req, res){
+    data.createTree( req.userId, req.body, function(data){
+      res.status(201).json({
+        data[0]
+      });
+    })
+    .catch(e => console.error(e.stack));
+});
+
+
 app.get('/trees/details/user/:user_id', function(req, res){   
     
-    let query = {      
-        
-        text: 'SELECT * FROM datapoints WHERE user_id = $1',
-        values: [req.params.user_id]
-      }
-      pool.query(query)
-      .then(function(data){
-          res.status(200).json({              
-              data: data.rows
-          })
-      })
-      .catch(e => console.error(e.stack));
+  data.treesForUser(req.params.user_id, function(data){
+    res.status(200).json({              
+      data: data.rows
+    })
+  })
+    .catch(e => console.error(e.stack));
 
 });
 
 app.get('/trees', function(req, res){   
     
-    let query = {      
-        
-        text: 'SELECT * FROM trees'
-      }
-      
-      pool.query(query)
-      .then(function(data){
-          res.status(200).json({              
-              data: data.rows
-          })
-      })
-      .catch(e => console.error(e.stack));
+  data.trees(function(data){
+    res.status(200).json({              
+      data: data.rows
+    })
+  })
+    .catch(e => console.error(e.stack));
 
 });
   
