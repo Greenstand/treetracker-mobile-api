@@ -130,10 +130,10 @@ app.get('/favicon.ico', function(req, res) {
     res.end();
 });
 
-app.post('/trees/create', fucntion(req, res){
+app.post('/trees/create', function(req, res){
     data.createTree( req.userId, req.body, function(data){
       res.status(201).json({
-        data[0]
+        data
       });
     })
     .catch(e => console.error(e.stack));
