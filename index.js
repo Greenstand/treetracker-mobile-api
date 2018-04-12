@@ -50,7 +50,7 @@ app.post('/auth/register', function(req, res){
     return res.status(500, 'Server Error: No credential submitted');
   }
 
-  auth.register(function(data)){
+  auth.register(function(data){
     auth.token(req.body['client_id'], req.body['client_secret']),
       function(token){
         res.status(201).json({"token": token } );
@@ -60,7 +60,7 @@ app.post('/auth/register', function(req, res){
       
 });
 
-app.post('/auth/forgot', fucntion(req, res){
+app.post('/auth/forgot', function(req, res){
   console.log("reset");
   if (!req.body || (!req.body['client_id'] )) {
     return res.status(500, 'Server Error: No credential submitted');
