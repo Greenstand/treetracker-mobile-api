@@ -7,10 +7,12 @@ const { Pool, Client } = require('pg');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const authModule = require('./lib/auth');
+const dataModule = require('./lib/data');
 
-const conn = require('./config');
+const config = require('./config');
 const pool = new Pool({
-  connectionString: conn.connectionString
+  connectionString: config.connectionString
 });
 
 pool.on('connect', (client) => {
@@ -18,6 +20,12 @@ pool.on('connect', (client) => {
 })
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+// this needs to be stubbed
+const smtpTransport = nodemailer.createTransport(config.smtpSettings);
+
+const auth = authModule(pool, smtpTransport);
+const data = dataModule(pool);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -41,7 +49,6 @@ app.post('/auth/token', function(req, res){
       res.status(401).send('Authentication Failed');
     }
   )
-  .catch(e => console.error(e.stack));
 
 });
 
@@ -50,14 +57,24 @@ app.post('/auth/register', function(req, res){
     return res.status(500, 'Server Error: No credential submitted');
   }
 
-  auth.register(function(data){
-    auth.token(req.body['client_id'], req.body['client_secret']),
-      function(token){
-        res.status(201).json({"token": token } );
-        res.end();
-      }
-  });
-      
+  auth.register(req.body['client_id'], 
+    req.body['client_secret'], 
+    req.body,
+    function(data){
+      auth.token(
+        req.body['client_id'], 
+        req.body['client_secret'],
+        function(token){
+          res.status(201).json({"token": token } );
+          res.end();
+        },
+        function(error){
+          res.status(400);
+          res.end();
+        });
+    }
+  );
+        
 });
 
 app.post('/auth/forgot', function(req, res){
@@ -66,12 +83,13 @@ app.post('/auth/forgot', function(req, res){
     return res.status(500, 'Server Error: No credential submitted');
   }
 
-  auth.forgot(function(data){
+  auth.forgot(
+    req.body['client_id'],
+    function(data){
     res.status(200).json({
         message: 'Password Reset.'
     });
-  })
-  .catch(e => console.error(e.stack));
+  });
  
 });
 
