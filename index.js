@@ -103,7 +103,7 @@ app.use((req, res, next)=>{
   console.log(token);
   if(token){
     //Decode the token
-    jwt.verify(token, cert, (err,decod)=>{
+    jwt.verify(token, config.jwtCertificate, (err,decod)=>{
       if(err){
         console.log(err);
         res.status(403).json({
