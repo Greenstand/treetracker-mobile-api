@@ -153,30 +153,27 @@ app.post('/trees/create', function(req, res){
       res.status(201).json({
         data
       });
-    })
-    .catch(e => console.error(e.stack));
+    });
 });
 
 
-app.get('/trees/details/user/:user_id', function(req, res){   
+app.get('/trees/details/user', function(req, res){   
     
-  data.treesForUser(req.params.user_id, function(data){
-    res.status(200).json({              
-      data: data.rows
-    })
-  })
-    .catch(e => console.error(e.stack));
+  data.treesForUser(req.userId, function(data){
+    res.status(200).json(              
+       data.rows
+    )
+  });
 
 });
 
 app.get('/trees', function(req, res){   
     
   data.trees(function(data){
-    res.status(200).json({              
-      data: data.rows
-    })
+    res.status(200).json(             
+      data.rows
+    )
   })
-    .catch(e => console.error(e.stack));
 
 });
   
