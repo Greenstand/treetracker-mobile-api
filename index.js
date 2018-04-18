@@ -35,6 +35,7 @@ app.use(bodyParser.json()); // parse application/json
 app.set('view engine','html');
 
 app.post('/auth/token', function(req, res){
+  console.log('/auth/token');
   if (!req.body || (!req.body['client_id'] || !req.body['client_secret'])) {
     res.status(500).send('Server Error: No credential submitted');
     res.end();
