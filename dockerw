@@ -1,7 +1,5 @@
 #!/bin/bash
-IMAGE=treetracker-mobile-api
-VERSION=latest
-CONTAINER_NAME=mobile-api
+source .env
 
 RUN_MODE=run
 BUILD_MODE=build
