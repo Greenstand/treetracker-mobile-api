@@ -41,7 +41,7 @@ app.post('/auth/token', function(req, res){
     return;
   }
 
-  if(req.body['client_id'] != config.api_client_id || req.body['client_secret'] != api_client_secret){
+  if(req.body['client_id'] != config.api_client_id || req.body['client_secret'] != config.api_client_secret){
     res.status(401).send('Error: Invalid credentials');
     res.end();
     return;
@@ -121,7 +121,7 @@ app.put('/devices/', function(req, res) {
       data
     });
   });
-}
+});
 
 app.post('/trees/create', function(req, res){
     data.createTree( req.userId, req.body, function(data){
