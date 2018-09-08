@@ -7,7 +7,7 @@ After=network.target
 Environment=NODE_PORT=3000
 Type=simple
 User=root
-ExecStart=/usr/local/bin/node /root/treetracker-mobile-api/index.js
+ExecStart=/usr/bin/node /root/treetracker-mobile-api/index.js
 Restart=on-failure
 
 [Install]

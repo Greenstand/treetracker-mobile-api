@@ -24,11 +24,11 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // this needs to be stubbed
 const smtpTransport = nodemailer.createTransport(config.smtpSettings);
 
-const auth = authModule(pool, smtpTransport);
+const auth = authModule(pool, config.jwtCertificate);
 const data = dataModule(pool);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.NODE_PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
@@ -68,6 +68,8 @@ app.use((req, res, next)=>{
   console.log(token);
   if(token){
     //Decode the token
+    console.log(config);
+    console.log(config.jwtCertificate);
     jwt.verify(token, config.jwtCertificate, (err,decod)=>{
       if(err){
         console.log(err);
