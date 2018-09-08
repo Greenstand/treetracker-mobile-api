@@ -35,13 +35,19 @@ app.use(bodyParser.json()); // parse application/json
 app.set('view engine','html');
 
 app.post('/auth/token', function(req, res){
-  if (!req.body || (!req.body['client_id'] || !req.body['client_secret'])) {
-    res.status(500).send('Server Error: No credential submitted');
+  if (!req.body || (!req.body['client_id'] || !req.body['client_secret'] || !req.body['device_android_id'])) {
+    res.status(406).send('Error: No credential submitted');
+    res.end();
+    return;
+  }
+
+  if(req.body['client_id'] != config.api_client_id || req.body['client_secret'] != api_client_secret){
+    res.status(401).send('Error: Invalid credentials');
     res.end();
     return;
   }
   
-  auth.token(req.body['client_id'], req.body['client_secret'], 
+  auth.token(req.body['device_android_id'], 
     function(token) {
       res.status(200).json({"token": token});
     }, 
@@ -50,47 +56,6 @@ app.post('/auth/token', function(req, res){
     }
   )
 
-});
-
-app.post('/auth/register', function(req, res){
-  if (!req.body || (!req.body['client_id'] || !req.body['client_secret'])) {
-    return res.status(500, 'Server Error: No credential submitted');
-  }
-
-  auth.register(req.body['client_id'], 
-    req.body['client_secret'], 
-    req.body,
-    function(data){
-      auth.token(
-        req.body['client_id'], 
-        req.body['client_secret'],
-        function(token){
-          res.status(201).json({"token": token } );
-          res.end();
-        },
-        function(error){
-          res.status(400);
-          res.end();
-        });
-    }
-  );
-        
-});
-
-app.post('/auth/forgot', function(req, res){
-  console.log("reset");
-  if (!req.body || (!req.body['client_id'] )) {
-    return res.status(500, 'Server Error: No credential submitted');
-  }
-
-  auth.forgot(
-    req.body['client_id'],
-    function(data){
-    res.status(200).json({
-        message: 'Password Reset.'
-    });
-  });
- 
 });
 
 // middleware layer that checks jwt authentication
@@ -117,14 +82,14 @@ app.use((req, res, next)=>{
 
         const query = {
           text: `SELECT id
-          FROM users
-          WHERE email = $1`,
-          values: [decod['client_id']]
+          FROM devices 
+          WHERE id = $1`,
+          values: [decod['device_id']]
         }
         pool.query(query)
         .then(data => {
             if (data.rows.length === 1) {
-              req.userId = data.rows[0].id;
+              req.deviceId = data.rows[0].id;
               next();
             } else {
               res.status(401).send('Authentication Failed');
@@ -147,6 +112,14 @@ app.get('/favicon.ico', function(req, res) {
     res.status(204);
     res.end();
 });
+
+app.put('/devices/', function(req, res) {
+  data.updateDevice(req.deviceId, req.body, function(data){
+    res.status(200).json({
+      data
+    });
+  });
+}
 
 app.post('/trees/create', function(req, res){
     data.createTree( req.userId, req.body, function(data){
