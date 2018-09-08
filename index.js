@@ -68,8 +68,6 @@ app.use((req, res, next)=>{
   console.log(token);
   if(token){
     //Decode the token
-    console.log(config);
-    console.log(config.jwtCertificate);
     jwt.verify(token, config.jwtCertificate, (err,decod)=>{
       if(err){
         console.log(err);
@@ -80,6 +78,7 @@ app.use((req, res, next)=>{
       else{
         //If decoded then call next() so that respective route is called.
         req.decoded=decod;
+        console.log("decod");
         console.log(decod);
 
         const query = {
