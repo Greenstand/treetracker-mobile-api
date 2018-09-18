@@ -122,8 +122,8 @@ app.put('/devices/', function(req, res) {
   });
 });
 
-app.post('/planters/registration'), function(req, res) {
-  data.findOrCreateUser(body.planter_identifier, req.body.first_name, req.body.last_name, req.body.organization, function(user){
+app.post('/planters/registration', function(req, res) {
+  data.findOrCreateUser(req.body.planter_identifier, req.body.first_name, req.body.last_name, req.body.organization, function(user){
 
     data.createPlanterRegistration(user.id, req.deviceId, req.body, function(data){
       res.status(200).json({
