@@ -136,7 +136,7 @@ app.post('/planters/registration', function(req, res) {
 });
 
 app.post('/trees/create', function(req, res){
-    data.findOrCreateUser(req.body.planter_identifier, function(user){
+    data.findUser(req.body.planter_identifier, function(user){
 
         data.createTree( user.id, req.deviceId, req.body, function(data){
             res.status(201).json({
