@@ -122,6 +122,14 @@ app.put('/devices/', function(req, res) {
   });
 });
 
+app.post('/planters/registration'), function(req, res) {
+  data.createPlanterRegistration(req.deviceId, req.body, function(data){
+      res.status(200).json({
+        data
+      });
+  });
+}
+
 app.post('/trees/create', function(req, res){
     data.findOrCreateUser(req.body.planter_identifier, function(user){
 
