@@ -62,10 +62,8 @@ app.post('/auth/token', function(req, res){
 
 app.use(bearerToken());
 app.use((req, res, next)=>{
-  console.log("Middleware");
   // check header or url parameters or post parameters for token
   var token = req.token;
-  console.log(token);
   if(token){
     //Decode the token
     jwt.verify(token, config.jwtCertificate, (err,decod)=>{
@@ -78,8 +76,6 @@ app.use((req, res, next)=>{
       else{
         //If decoded then call next() so that respective route is called.
         req.decoded=decod;
-        console.log("decod");
-        console.log(decod);
 
         const query = {
           text: `SELECT id
