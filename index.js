@@ -134,6 +134,8 @@ app.post('/planters/registration', function(req, res) {
 app.post('/trees/create', function(req, res){
     data.findUser(req.body.planter_identifier, function(user){
 
+        // if they don't hav the user photo, set their photo here
+
         data.createTree( user.id, req.deviceId, req.body, function(data){
             res.status(201).json({
                 data
