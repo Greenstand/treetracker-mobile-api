@@ -36,12 +36,14 @@ app.set('view engine','html');
 
 app.post('/auth/token', function(req, res){
   if (!req.body || (!req.body['client_id'] || !req.body['client_secret'] || !req.body['device_android_id'])) {
+    console.log('ERROR: Authentication, no credentials submitted');
     res.status(406).send('Error: No credential submitted');
     res.end();
     return;
   }
 
   if(req.body['client_id'] != config.api_client_id || req.body['client_secret'] != config.api_client_secret){
+    console.log('ERROR: Authentication, invalid credentials');
     res.status(401).send('Error: Invalid credentials');
     res.end();
     return;
@@ -50,9 +52,12 @@ app.post('/auth/token', function(req, res){
   auth.token(req.body['device_android_id'], 
     function(token) {
       res.status(200).json({"token": token});
+      return;
     }, 
     function(error) {
+      console.log('ERROR: Authentication, error creating token for device');
       res.status(401).send('Authentication Failed');
+      return;
     }
   )
 
@@ -69,6 +74,7 @@ app.use((req, res, next)=>{
     jwt.verify(token, config.jwtCertificate, (err,decod)=>{
       if(err){
         console.log(err);
+        console.log('ERROR: Authentication, token  not verified');
         res.status(403).json({
           message:"Wrong Token"
         });
@@ -89,6 +95,7 @@ app.use((req, res, next)=>{
               req.deviceId = data.rows[0].id;
               next();
             } else {
+              console.log('ERROR: Authentication, token didn not match a device');
               res.status(401).send('Authentication Failed');
             }
         })
@@ -99,6 +106,7 @@ app.use((req, res, next)=>{
     });
   }
   else{
+    console.log('ERROR: Authentication, no token supplied for protected path');
     res.status(403).json({
       message:"No Token"
     });
@@ -133,6 +141,8 @@ app.post('/planters/registration', function(req, res) {
 
 app.post('/trees/create', function(req, res){
     data.findUser(req.body.planter_identifier, function(user){
+
+        // if they don't hav the user photo, set their photo here
 
         data.createTree( user.id, req.deviceId, req.body, function(data){
             res.status(201).json({
