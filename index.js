@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer');
 const authModule = require('./lib/auth');
 const dataModule = require('./lib/data');
 
-const config = require('./config');
+const config = require('./config/config');
 const pool = new Pool({
   connectionString: config.connectionString
 });
