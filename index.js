@@ -48,12 +48,12 @@ app.post('/auth/token', function(req, res){
     res.end();
     return;
   }
-  
-  auth.token(req.body['device_android_id'], 
+
+  auth.token(req.body['device_android_id'],
     function(token) {
       res.status(200).json({"token": token});
       return;
-    }, 
+    },
     function(error) {
       console.log('ERROR: Authentication, error creating token for device');
       res.status(401).send('Authentication Failed');
@@ -85,7 +85,7 @@ app.use((req, res, next)=>{
 
         const query = {
           text: `SELECT id
-          FROM devices 
+          FROM devices
           WHERE id = $1`,
           values: [decod['device_id']]
         }
@@ -154,30 +154,32 @@ app.post('/trees/create', function(req, res){
 });
 
 
-app.get('/trees/details/user', function(req, res){   
-    
+app.get('/trees/details/user', function(req, res){
+
   data.treesForUser(req.userId, function(data){
-    res.status(200).json(              
+    res.status(200).json(
        data.rows
     )
   });
 
 });
 
-app.get('/trees', function(req, res){   
-    
+app.get('/trees', function(req, res){
+
   data.trees(function(data){
-    res.status(200).json(             
+    res.status(200).json(
       data.rows
     )
   })
 
 });
-  
-app.get('*',function(req, res){    
+
+app.get('*',function(req, res){
     res.sendFile(path.join(__dirname,'index.html'));
 });
 
 app.listen(port,()=>{
     console.log('listening on port ' + port);
 });
+
+module.exports = app;

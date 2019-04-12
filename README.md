@@ -1,18 +1,25 @@
-# treetracker-mobile-api
-The API for the mobile app segement
+# Treetracker Mobile API
+ > The API for the mobile app segment
 
-# Dockerized deployment
+## Requirements
 
-## Setup
-To run docker on a local machine, you will have to install Docker first. Docker is a linux container technology, so running it on Mac or Windows requires an application with an attached linux VM. Docker provides one for each OS by default.
+ - Install Node
+    - on OSX , install git and type 'brew install git'
+    - on OSX, install [home brew](http://brew.sh/) and type `brew install node`
+    - on Windows, use the installer available at [nodejs.org](http://nodejs.org/)
+    - On OSX you can alleviate the need to run as sudo by [following John Papa's instructions](http://jpapa.me/nomoresudo)
+ - Open terminal
 
-[Docker for Mac](https://docs.docker.com/docker-for-mac/install/)
-[Docker for Windows](https://docs.docker.com/docker-for-windows/install/)
+## Quick Start
 
-To install on linux, you can run `sudo apt-get install -y docker-ce` but there is [additional setup](https://docs.docker.com/install/linux/docker-ce/ubuntu/#set-up-the-repository) to verify keys and the like.
+Contact the project maintainer on Slack to request access to our development database to begin contributing.
 
-## Dockerw script
+To get up and running run the following command
+```
+$ npm run server
+```
 
-Run `./dockerw build` to build the image of the mobile API locally using defaults, and to run the image use `./dockerw run`.
-
-To see what arguments can be passed, simply run `./dockerw`. In order to use something created in the `build` mode, you must specify the same arguments in the `run` mode or it will attempt to pull the image. There is also an `up` mode that can be used, to build and run in one command with the same arguments.
+To run the unit test for this project
+```
+$ npm run test
+```
