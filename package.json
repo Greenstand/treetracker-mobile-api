@@ -5,9 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test-all",
-    "test-all": "NODE_ENV=test mocha --require co-mocha test/helpers '*/*.spec.js'",
     "test-unit": "NODE_ENV=test mocha --require co-mocha 'lib/*.spec.js'",
-    "test-int": "NODE_ENV=test mocha --require co-mocha test/helpers 'test/*.spec.js'",
+    "test-int": "NODE_ENV=test mocha --require co-mocha 'index.spec.js'",
     "test-auth": "NODE_ENV=test mocha --require co-mocha 'lib/auth.spec.js'",
     "server": "node index.js"
   },
