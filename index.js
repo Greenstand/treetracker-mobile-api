@@ -22,13 +22,13 @@ pool.on('connect', (client) => {
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // this needs to be stubbed
-const smtpTransport = nodemailer.createTransport(config.smtpSettings);
+// const smtpTransport = nodemailer.createTransport(config.smtpSettings);
 
 const auth = authModule(pool, config.jwtCertificate);
 const data = dataModule(pool);
 
 const app = express();
-const port = process.env.NODE_PORT || 3000;
+const port = process.env.NODE_PORT || 3005;
 
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
