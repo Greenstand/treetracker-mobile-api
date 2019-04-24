@@ -3,4 +3,5 @@ node_js:
   - "8.11"
 before_script:
   - npm install -g node-gyp
-  - base64 --decode test/test-config >> config.js
+  - mkdir -p ./config
+  - base64 --decode test/test-config >> ./config/config.js
