@@ -99,6 +99,19 @@ describe('API', () => {
             done();
           })
       });
+
+      it('should not have trees with the same uuid', (done) => {
+        request.get('/trees')
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) throw err;
+            let treesMapped = res.body.map(x => x.uuid);
+            console.log(treesMapped);
+            treesMapped.some((x, i) => expect(treesMapped.indexOf(x) != i).to.not.equal(false));
+            done();
+          });
+      });
     });
 
     describe('GET /trees/details/user', () => {
@@ -140,7 +153,8 @@ describe('API', () => {
             note: 'my note',
             timestamp: 1536367800,
             image_url: 'http://www.myimage.org/',
-            sequence_id: 1
+            sequence_id: 1,
+            uuid: uuid()
           })
           .set('Authorization', `Bearer ${authToken}`)
           .set('Accept', 'application/json')
