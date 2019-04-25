@@ -8,7 +8,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const authModule = require('./lib/auth');
-const dataModule = require('./lib/data');
+const Data = require('./lib/data');
 
 const config = require('./config/config');
 const pool = new Pool({
@@ -25,7 +25,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // const smtpTransport = nodemailer.createTransport(config.smtpSettings);
 
 const auth = authModule(pool, config.jwtCertificate);
-const data = dataModule(pool);
+const data = new Data(pool);
 
 const app = express();
 const port = process.env.NODE_PORT || 3005;
@@ -139,16 +139,11 @@ app.post('/planters/registration', function(req, res) {
 
 });
 
-app.post('/trees/create', function(req, res){
-    data.findUser(req.body.planter_identifier, function(user){
+app.post('/trees/create', async (req, res) => {
+    data.findUser(req.body.planter_identifier, async(user) => {
 
-        // if they don't hav the user photo, set their photo here
-
-        data.createTree( user.id, req.deviceId, req.body, function(data){
-            res.status(201).json({
-                data
-            });
-        });
+        await data.createTree( user.id, req.deviceId, req.body);
+        res.status(201).json({ data });
 
     });
 });
