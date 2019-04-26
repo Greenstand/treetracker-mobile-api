@@ -8,7 +8,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const authModule = require('./lib/auth');
-const dataModule = require('./lib/data');
+const Data = require('./lib/data');
 
 const config = require('./config/config');
 const pool = new Pool({
@@ -25,7 +25,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // const smtpTransport = nodemailer.createTransport(config.smtpSettings);
 
 const auth = authModule(pool, config.jwtCertificate);
-const data = dataModule(pool);
+const data = new Data(pool);
 
 const app = express();
 const port = process.env.NODE_PORT || 3005;
@@ -118,59 +118,35 @@ app.get('/favicon.ico', function(req, res) {
     res.end();
 });
 
-app.put('/devices/', function(req, res) {
-  data.updateDevice(req.deviceId, req.body, function(data){
-    res.status(200).json({
-      data
-    });
-  });
+app.put('/devices/', async (req, res) => {
+  await data.updateDevice(req.deviceId, req.body)
+  res.status(200).json({});
 });
 
-app.post('/planters/registration', function(req, res) {
-  data.findOrCreateUser(req.body.planter_identifier, req.body.first_name, req.body.last_name, req.body.organization, function(user){
-
-    data.createPlanterRegistration(user.id, req.deviceId, req.body, function(data){
-      res.status(200).json({
-        data
-      });
-    });
-
-  });
-
+app.post('/planters/registration', async (req, res) => {
+  const user = await data.findOrCreateUser(req.body.planter_identifier, req.body.first_name, req.body.last_name, req.body.organization);
+  await data.createPlanterRegistration(user.id, req.deviceId, req.body);
+  res.status(200).json({});
 });
 
-app.post('/trees/create', function(req, res){
-    data.findUser(req.body.planter_identifier, function(user){
-
-        // if they don't hav the user photo, set their photo here
-
-        data.createTree( user.id, req.deviceId, req.body, function(data){
-            res.status(201).json({
-                data
-            });
-        });
-
-    });
+app.post('/trees/create', async (req, res) => {
+    const user = await data.findUser(req.body.planter_identifier);
+    const tree = await data.createTree( user.id, req.deviceId, req.body);
+    res.status(201).json({ tree });
 });
 
 
-app.get('/trees/details/user', function(req, res){
+app.get('/trees/details/user', async (req, res) => {
 
-  data.treesForUser(req.userId, function(data){
-    res.status(200).json(
-       data.rows
-    )
-  });
+  const trees = await data.treesForUser(req.userId);
+  res.status(200).json( trees );
 
 });
 
-app.get('/trees', function(req, res){
+app.get('/trees', async (req, res) => {
 
-  data.trees(function(data){
-    res.status(200).json(
-      data.rows
-    )
-  })
+  const trees = await data.trees();
+  res.status(200).json( trees );
 
 });
 
