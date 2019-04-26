@@ -107,7 +107,6 @@ describe('API', () => {
           .end((err, res) => {
             if (err) throw err;
             let treesMapped = res.body.map(x => x.uuid);
-            console.log(treesMapped);
             treesMapped.some((x, i) => expect(treesMapped.indexOf(x) != i).to.not.equal(false));
             done();
           });
