@@ -164,14 +164,12 @@ describe('API', () => {
           note: 'my note',
           timestamp: 1536367800,
           image_url: 'http://www.myimage.org/',
-          sequence_id: 1,
           uuid: treeUuid
         };
         request.post('/trees/create')
           .send(treeData)
           .set('Authorization', `Bearer ${authToken}`)
           .set('Accept', 'application/json')
-          .expect(201)
           .end((err, res) => {
 
           request.post('/trees/create')
@@ -186,6 +184,74 @@ describe('API', () => {
               done();
 
             });
+          });
+      });
+
+      it('should allow a missing UUID for backwards compatibility', (done) => {
+        request.post('/trees/create')
+          .send({
+            planter_identifier: 'asdf-asdf-asdf',
+            lat: 80,
+            lon: 120,
+            gps_accuracy: 1,
+            note: 'my note',
+            timestamp: 1536367800,
+            image_url: 'http://www.myimage.org/',
+            sequence_id: 1
+          })
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Accept', 'application/json')
+          .expect(201)
+          .end((err, res) => {
+            if (err) throw done(err);
+            expect(res.rows).to.not.equal(0);
+            done();
+          });
+      });
+
+      it('should allow a null UUID for backwards compatibility', (done) => {
+        request.post('/trees/create')
+          .send({
+            planter_identifier: 'asdf-asdf-asdf',
+            lat: 80,
+            lon: 120,
+            gps_accuracy: 1,
+            note: 'my note',
+            timestamp: 1536367800,
+            image_url: 'http://www.myimage.org/',
+            sequence_id: 1,
+            uuid: null
+          })
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Accept', 'application/json')
+          .expect(201)
+          .end((err, res) => {
+            if (err) throw done(err);
+            expect(res.rows).to.not.equal(0);
+            done();
+          });
+      });
+
+      it('should allow an empty UUID for backwards compatibility', (done) => {
+        request.post('/trees/create')
+          .send({
+            planter_identifier: 'asdf-asdf-asdf',
+            lat: 80,
+            lon: 120,
+            gps_accuracy: 1,
+            note: 'my note',
+            timestamp: 1536367800,
+            image_url: 'http://www.myimage.org/',
+            sequence_id: 1,
+            uuid: ""
+          })
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Accept', 'application/json')
+          .expect(201)
+          .end((err, res) => {
+            if (err) throw done(err);
+            expect(res.rows).to.not.equal(0);
+            done();
           });
       });
     });

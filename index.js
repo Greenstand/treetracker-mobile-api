@@ -131,7 +131,12 @@ app.post('/planters/registration', async (req, res) => {
 
 app.post('/trees/create', async (req, res) => {
     const user = await data.findUser(req.body.planter_identifier);
-    const duplicate  = await data.checkForExistingTree(req.body.uuid);
+    var duplicate = null;
+    if(req.body.uuid !== null 
+      && req.body.uuid !== undefined
+      && req.body.uuid !== ""){
+      duplicate  = await data.checkForExistingTree(req.body.uuid);
+    }
     if(duplicate !== null){
       res.status(200).json({ duplicate });
     } else {
