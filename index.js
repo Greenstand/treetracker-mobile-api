@@ -1,4 +1,5 @@
 const express = require('express');
+const Sentry = require('@sentry/node');
 const bearerToken = require('express-bearer-token');
 const bodyParser = require('body-parser');
 const http = require('http');
@@ -30,8 +31,22 @@ const data = new Data(pool);
 const app = express();
 const port = process.env.NODE_PORT || 3005;
 
+Sentry.init({ dsn: config.sentry_dsn });
+
+app.use(Sentry.Handlers.requestHandler());
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + '\n');
+});
+
+
 app.set('view engine','html');
 
 app.post('/auth/token', function(req, res){
